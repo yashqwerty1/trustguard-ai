@@ -1,0 +1,401 @@
+"use client";
+
+import { jsPDF } from "jspdf";
+
+interface Threat {
+  severity: string;
+  title: string;
+  user: string;
+  time: string;
+}
+
+interface Props {
+  open: boolean;
+  threat: Threat | null;
+  onClose: () => void;
+}
+
+export default function IncidentDrawer({ open, threat, onClose }: Props) {
+  const incidentId =
+    "TG-" +
+    (threat?.title ?? "UNKNOWN").replace(/\s/g, "").slice(0, 6).toUpperCase();
+  if (!open || !threat) return null;
+
+  let riskScore = 0;
+  let decision = "ALLOW";
+
+  let source = "Unknown";
+  let destination = "Unknown";
+  let expectedTravel = "-";
+  let actualTravel = "-";
+  let deviceStatus = "Trusted";
+  let vpnStatus = "Not Detected";
+
+  let riskBreakdown = [
+    {
+      name: "Baseline Risk",
+      score: 5,
+    },
+  ];
+  if (threat.title.includes("Impossible Travel")) {
+    riskScore = 98;
+    decision = "BLOCK";
+
+    source = "Ahmedabad";
+    destination = "London";
+
+    expectedTravel = "9 Hours";
+    actualTravel = "2 Hours";
+
+    deviceStatus = "New Device";
+    vpnStatus = "Suspected";
+
+    riskBreakdown = [
+      { name: "Impossible Travel", score: 40 },
+      { name: "New Device", score: 20 },
+      { name: "Behavioral Anomaly", score: 18 },
+      { name: "Recovery Signal", score: 20 },
+    ];
+  } else if (threat.title.includes("New Device")) {
+    riskScore = 72;
+    decision = "OTP REQUIRED";
+
+    source = "Ahmedabad";
+    destination = "Ahmedabad";
+
+    expectedTravel = "-";
+    actualTravel = "-";
+
+    deviceStatus = "Unknown Device";
+    vpnStatus = "Not Detected";
+
+    riskBreakdown = [
+      { name: "New Device", score: 20 },
+      { name: "Device Fingerprint Mismatch", score: 18 },
+      { name: "Behavioral Change", score: 12 },
+    ];
+  } else if (threat.title.includes("Recovery Fraud")) {
+    riskScore = 91;
+    decision = "BLOCK";
+
+    source = "Mumbai";
+    destination = "Recovery Portal";
+
+    expectedTravel = "-";
+    actualTravel = "-";
+
+    deviceStatus = "Unknown";
+    vpnStatus = "Suspected";
+
+    riskBreakdown = [
+      { name: "Recovery Fraud", score: 35 },
+      { name: "Identity Mismatch", score: 25 },
+      { name: "Suspicious Recovery Flow", score: 20 },
+    ];
+  } else if (threat.title.includes("Password Spray")) {
+    riskScore = 88;
+    decision = "BLOCK";
+
+    source = "Unknown";
+    destination = "Corporate Identity";
+
+    expectedTravel = "-";
+    actualTravel = "-";
+
+    deviceStatus = "Unknown";
+    vpnStatus = "Detected";
+
+    riskBreakdown = [
+      { name: "Password Spray", score: 40 },
+      { name: "Credential Abuse", score: 25 },
+      { name: "High Volume Attempts", score: 15 },
+    ];
+  } else if (threat.title.includes("VPN")) {
+    riskScore = 45;
+    decision = "ALLOW";
+
+    source = "VPN Exit Node";
+    destination = "Corporate Portal";
+
+    expectedTravel = "-";
+    actualTravel = "-";
+
+    deviceStatus = "Trusted";
+    vpnStatus = "Detected";
+
+    riskBreakdown = [
+      { name: "VPN Usage", score: 15 },
+      { name: "Location Change", score: 10 },
+    ];
+  }
+
+  riskScore = riskBreakdown.reduce((total, item) => total + item.score, 0);
+
+  if (riskScore >= 80) {
+    decision = "BLOCK";
+  } else if (riskScore >= 50) {
+    decision = "OTP REQUIRED";
+  } else {
+    decision = "ALLOW";
+  }
+
+  const riskColor =
+    riskScore >= 80
+      ? "text-red-400"
+      : riskScore >= 60
+        ? "text-yellow-400"
+        : "text-green-400";
+
+  const decisionColor =
+    decision === "BLOCK"
+      ? "text-red-400"
+      : decision === "OTP REQUIRED"
+        ? "text-yellow-400"
+        : "text-green-400";
+
+  const generatePDF = () => {
+    const doc = new jsPDF();
+
+    doc.setFontSize(20);
+    doc.setTextColor(0, 150, 255);
+    doc.setFontSize(22);
+    doc.text("TRUSTGUARD AI", 20, 20);
+
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(16);
+    doc.text("Incident Investigation Report", 20, 32);
+
+    doc.setFontSize(12);
+
+    doc.text(`Incident ID: ${incidentId}`, 20, 40);
+    doc.text(`Threat Type: ${threat.title}`, 20, 50);
+    doc.text(`User: ${threat.user}`, 20, 60);
+
+    doc.text(`Risk Score: ${riskScore}`, 20, 80);
+    doc.text(`AI Decision: ${decision}`, 20, 90);
+
+    doc.text(`Source: ${source}`, 20, 110);
+    doc.text(`Destination: ${destination}`, 20, 120);
+
+    doc.text(`Expected Travel: ${expectedTravel}`, 20, 130);
+    doc.text(`Actual Travel: ${actualTravel}`, 20, 140);
+
+    doc.text(`Device Status: ${deviceStatus}`, 20, 150);
+    doc.text(`VPN Status: ${vpnStatus}`, 20, 160);
+
+    doc.text("Risk Breakdown:", 20, 180);
+
+    let y = 190;
+
+    riskBreakdown.forEach((item) => {
+      doc.text(`${item.name}: +${item.score}`, 25, y);
+      y += 10;
+    });
+
+    doc.text(
+      `Fraud Prevented: ₹${
+        riskScore >= 80 ? "10,00,000" : riskScore >= 50 ? "25,000" : "0"
+      }`,
+      20,
+      y + 15,
+    );
+
+    doc.text("Generated by TrustGuard AI", 20, y + 35);
+
+    doc.save(`${incidentId}.pdf`);
+  };
+
+  return (
+    <div
+      className="
+      fixed
+      top-0
+      right-0
+      h-screen
+      w-[450px]
+      bg-slate-950
+      border-l
+      border-cyan-500/20
+      shadow-2xl
+      z-50
+      overflow-y-auto
+      "
+    >
+      <div className="p-6">
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="text-2xl font-bold">Incident Investigation</h2>
+
+          <button
+            onClick={onClose}
+            className="text-slate-400 hover:text-white text-2xl"
+          >
+            ×
+          </button>
+        </div>
+
+        <div className="space-y-6">
+          <div>
+            <p className="text-slate-400 text-sm">Threat Type</p>
+            <h3 className="text-xl font-semibold mt-2">{threat.title}</h3>
+          </div>
+
+          <div>
+            <p className="text-slate-400 text-sm">User</p>
+            <h3 className="font-semibold mt-2">{threat.user}</h3>
+          </div>
+
+          <div>
+            <p className="text-slate-400 text-sm">Severity</p>
+
+            <span
+              className={`inline-flex mt-2 px-3 py-1 rounded-full text-sm font-semibold
+              ${
+                threat.severity === "HIGH"
+                  ? "bg-red-500/20 text-red-400"
+                  : threat.severity === "MEDIUM"
+                    ? "bg-yellow-500/20 text-yellow-400"
+                    : "bg-green-500/20 text-green-400"
+              }`}
+            >
+              {threat.severity}
+            </span>
+          </div>
+
+          <div className="border-t border-slate-800 pt-6">
+            <h3 className="font-semibold mb-4">Investigation Details</h3>
+
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between">
+                <span>Source Location</span>
+                <span className="text-cyan-400">{source}</span>
+              </div>
+
+              <div className="flex justify-between">
+                <span>Destination</span>
+                <span className="text-red-400">{destination}</span>
+              </div>
+
+              <div className="flex justify-between">
+                <span>Expected Travel</span>
+                <span>{expectedTravel}</span>
+              </div>
+
+              <div className="flex justify-between">
+                <span>Actual Travel</span>
+                <span>{actualTravel}</span>
+              </div>
+
+              <div className="flex justify-between">
+                <span>Device Status</span>
+                <span className="text-yellow-400">{deviceStatus}</span>
+              </div>
+
+              <div className="flex justify-between">
+                <span>VPN Detection</span>
+                <span className="text-red-400">{vpnStatus}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="border-t border-slate-800 pt-6">
+            <h3 className="font-semibold mb-4">Risk Assessment</h3>
+
+            <div className="space-y-4">
+              <div>
+                <p className="text-slate-400 text-sm">Risk Score</p>
+
+                <h2 className={`text-5xl font-bold mt-2 ${riskColor}`}>
+                  {riskScore}
+                </h2>
+              </div>
+
+              <div>
+                <p className="text-slate-400 text-sm">AI Decision</p>
+
+                <h3 className={`text-2xl font-bold mt-2 ${decisionColor}`}>
+                  {decision}
+                </h3>
+              </div>
+            </div>
+          </div>
+
+          <div className="border-t border-slate-800 pt-6">
+            <h3 className="font-semibold mb-4">Risk Breakdown</h3>
+
+            <div className="space-y-3 text-sm">
+              {riskBreakdown.map((item) => (
+                <div key={item.name} className="flex justify-between">
+                  <span>{item.name}</span>
+
+                  <span className="text-red-400">+{item.score}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="border-t border-slate-800 pt-6">
+            <h3 className="font-semibold mb-4 text-cyan-400">
+              Investigation Report
+            </h3>
+
+            <div className="bg-slate-900 rounded-xl p-4 border border-cyan-500/10">
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between">
+                  <span>Incident ID</span>
+                  <span className="text-cyan-400"> {incidentId}</span>
+                </div>
+
+                <div className="flex justify-between">
+                  <span>Threat Type</span>
+                  <span>{threat.title}</span>
+                </div>
+
+                <div className="flex justify-between">
+                  <span>Risk Score</span>
+                  <span className={riskColor}>{riskScore}</span>
+                </div>
+
+                <div className="flex justify-between">
+                  <span>AI Decision</span>
+                  <span className={decisionColor}>{decision}</span>
+                </div>
+
+                <div className="flex justify-between">
+                  <span>Fraud Prevented</span>
+                  <span className="text-orange-400">
+                    ₹
+                    {riskScore >= 80
+                      ? "10,00,000"
+                      : riskScore >= 50
+                        ? "25,000"
+                        : "0"}
+                  </span>
+                </div>
+
+                <div className="flex justify-between">
+                  <span>Status</span>
+                  <span className="text-green-400">Investigation Complete</span>
+                </div>
+              </div>
+
+              <button
+                onClick={generatePDF}
+                className="
+  mt-5
+  w-full
+  bg-cyan-600
+  hover:bg-cyan-500
+  rounded-lg
+  py-3
+  font-semibold
+  transition
+  "
+              >
+                Generate Investigation Report
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
