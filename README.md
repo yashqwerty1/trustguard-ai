@@ -380,16 +380,67 @@ http://localhost:8000
 
 # 🎬 Demo Flow
 
-1. Launch Security Center
-2. Login to Platform
-3. View Identity Trust Dashboard
-4. Simulate Attack Scenarios
-5. Observe Trust Score Changes
-6. Analyze AI Decisions
-7. Open Investigation Center
-8. Generate Investigation Report
-9. View User Risk Profiles
-10. Present Executive Board View
+**1. Launch Security Center**
+
+
+<img width="1920" height="931" alt="image" src="https://github.com/user-attachments/assets/51ceca2b-9ab4-4fa5-8d2e-f91405507317" />
+
+   
+**2. Login to Platform**
+
+
+<img width="1920" height="930" alt="image" src="https://github.com/user-attachments/assets/e65ac6d6-558f-4051-8630-845f40d98ef8" />
+
+
+**NOTE :Just press Login or lauch DEMO Enviroment (Do not enter any other Credentials it wont work.)**
+
+   
+**3. View Identity Trust Dashboard**
+
+<img width="1920" height="932" alt="image" src="https://github.com/user-attachments/assets/ba97695f-5da6-4075-a31b-a31d0ea94e35" />
+
+
+<img width="1920" height="931" alt="image" src="https://github.com/user-attachments/assets/5b392b51-789e-4dcd-a7e6-45488a57a8df" />
+
+   
+**4. Simulate Attack Scenarios**
+
+<img width="1920" height="930" alt="image" src="https://github.com/user-attachments/assets/57d1c9a9-cb6f-4f7d-8e0f-5b7b1d825a36" />
+
+
+**5. Observe Trust Score Changes**
+
+
+<img width="1861" height="626" alt="image" src="https://github.com/user-attachments/assets/48c09099-25e2-401d-bdfb-93da524d0302" />
+
+
+<img width="929" height="487" alt="image" src="https://github.com/user-attachments/assets/bc660973-42f8-4c5d-bdb7-09e730028f6a" />
+
+   
+**6. Analyze AI Decisions**
+
+<img width="906" height="930" alt="image" src="https://github.com/user-attachments/assets/f45a6194-43d2-4d94-b843-1b97a80a99c8" />
+
+
+**7. Open Investigation Center**
+
+<img width="1884" height="931" alt="image" src="https://github.com/user-attachments/assets/b5f5746a-c5d6-4571-9b9a-3cd31298f909" />
+
+
+**8. Generate Investigation Report**
+
+<img width="1884" height="984" alt="image" src="https://github.com/user-attachments/assets/d6fbc824-32d8-4dc4-86c0-cae24fba519e" />
+
+**9. View User Risk Profiles**
+
+<img width="564" height="930" alt="image" src="https://github.com/user-attachments/assets/63eb58fe-8797-4e2c-b047-e5cc9bc971a4" />
+
+**NOTE: Click on Any Email in the "Live Threat Feed" to access this.**
+    
+**10. Present Executive Board View**
+
+<img width="1920" height="932" alt="image" src="https://github.com/user-attachments/assets/3d572e10-f01f-4067-bff1-d83599f44fcf" />
+
 
 ---
 
