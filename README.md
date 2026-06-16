@@ -6,6 +6,8 @@ TrustGuard AI is an intelligent Security Operations Center (SOC) platform design
 
 The platform combines AI-driven trust scoring, behavioral risk analysis, global threat intelligence, MITRE ATT&CK mapping, and executive security reporting into a single interactive dashboard.
 
+
+LIVE PROJECT: https://trustguard-ai-hazel.vercel.app/
 ---
 
 # 🚀 Problem Statement
