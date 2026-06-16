@@ -162,15 +162,24 @@ export default function Dashboard() {
   ]);
 
   useEffect(() => {
-    API.get("/dashboard")
-      .then((res) => {
-        setData(res.data);
+    const loadDashboard = async () => {
+      try {
+        const res = await Promise.race([
+          API.get("/dashboard"),
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error("Request timeout")), 5000),
+          ),
+        ]);
 
-        setTrustScore(res.data.trust_score);
-        setDisplayScore(res.data.trust_score);
+        const dashboard = (res as { data: DashboardData }).data;
+        setData(dashboard);
 
-        setDecision(res.data.decision);
-        setRiskLevel(res.data.risk_level);
+        setTrustScore(dashboard.trust_score);
+        setDisplayScore(dashboard.trust_score);
+
+        setDecision(dashboard.decision);
+        setRiskLevel(dashboard.risk_level);
+
         setConfidence(98);
 
         setContributors([
@@ -188,10 +197,27 @@ export default function Dashboard() {
         ]);
 
         setTrustScoreHistory([96, 94, 90, 76, 32]);
-      })
-      .catch(() => {
-        console.log("Backend unavailable");
-      });
+      } catch (err) {
+        console.error("Backend unavailable", err);
+
+        setData({
+          trust_score: 92,
+          decision: "ALLOW",
+          risk_level: "LOW",
+          active_threats: 3,
+          trusted_devices: 12,
+        });
+
+        setTrustScore(92);
+        setDisplayScore(92);
+
+        setDecision("ALLOW");
+        setRiskLevel("LOW");
+        setConfidence(98);
+      }
+    };
+
+    loadDashboard();
   }, []);
 
   useEffect(() => {
@@ -341,29 +367,29 @@ export default function Dashboard() {
       {alert && (
         <div
           className="
-        fixed
-        top-6
-        right-6
-        z-[9999]
-        animate-pulse
-        "
+          fixed
+          top-6
+          right-6
+          z-[9999]
+          animate-pulse
+          "
         >
           <div
             className={`
-          min-w-[350px]
-          rounded-xl
-          border
-          shadow-2xl
-          p-5
-          backdrop-blur-lg
-          ${
-            alert.severity === "HIGH"
-              ? "bg-red-500/10 border-red-500/40"
-              : alert.severity === "MEDIUM"
-                ? "bg-yellow-500/10 border-yellow-500/40"
-                : "bg-green-500/10 border-green-500/40"
-          }
-          `}
+            min-w-[350px]
+            rounded-xl
+            border
+            shadow-2xl
+            p-5
+            backdrop-blur-lg
+            ${
+              alert.severity === "HIGH"
+                ? "bg-red-500/10 border-red-500/40"
+                : alert.severity === "MEDIUM"
+                  ? "bg-yellow-500/10 border-yellow-500/40"
+                  : "bg-green-500/10 border-green-500/40"
+            }
+            `}
           >
             <div className="flex items-center gap-3">
               <div className="text-2xl">
@@ -411,12 +437,12 @@ export default function Dashboard() {
         <div className="grid lg:grid-cols-2 gap-8 mt-10">
           <div
             className="
-            bg-slate-900/60
-            border
-            border-cyan-500/20
-            rounded-2xl
-            p-4
-            "
+              bg-slate-900/60
+              border
+              border-cyan-500/20
+              rounded-2xl
+              p-4
+              "
           >
             <h2 className="mb-1 text-xl font-semibold">Identity Trust Core</h2>
 

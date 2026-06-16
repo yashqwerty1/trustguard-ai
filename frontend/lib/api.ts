@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "https://trustguard-ai-k1z0.onrender.com/dashboard",
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
 });
 
 export default API;
